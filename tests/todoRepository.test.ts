@@ -1,5 +1,5 @@
 // Import necessary modules and classes for testing
-import { TodoRepository, RepositoryError, TodoItem } from '../src/model';
+import { TodoRepository, TodoItem } from '../src/model';
 import { Database } from '../src/database';
 import config from '../src/config';
 
