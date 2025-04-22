@@ -5,7 +5,7 @@ Este projeto é um modelo de dados simples para um aplicativo de Todo. Ele demon
 
 ## Funcionalidades
 - **CRUD**: Criação, leitura, atualização e exclusão de itens de Todo.
-- **Padrão de Repositório**: Encapsulamento de operações de banco de dados para melhor modularidade.
+- **Padrão de projeto Repositório**: Encapsulamento de operações de banco de dados para melhor modularidade.
 
 ## Estrutura do Projeto
 ```
@@ -91,3 +91,84 @@ npm test
 ```
 
 Isso executará todos os casos de teste usando o [Jest](https://jestjs.io/) e exibirá os resultados no terminal.
+
+### Visão Geral do Uso das Classes `Database` e `TodoRepository`
+
+#### Classe `Database`
+A classe `Database` é responsável por gerenciar a conexão com o banco de dados MongoDB. Aqui está um exemplo básico de como utilizá-la:
+
+```typescript
+import { Database } from './src/database';
+import config from './src/config';
+
+const database = new Database(config);
+
+async function main() {
+    try {
+        await database.connect();
+        console.log('Conectado ao banco de dados');
+
+        // Use `database.getDb()` para acessar a instância do MongoDB
+        const db = database.getDb();
+        console.log('Nome do banco de dados:', db.databaseName);
+    } catch (error) {
+        console.error('Erro ao conectar ao banco de dados:', error);
+    } finally {
+        await database.disconnect();
+        console.log('Conexão com o banco de dados encerrada');
+    }
+}
+
+main();
+```
+
+#### Classe `TodoRepository`
+A classe `TodoRepository` encapsula as operações CRUD para itens de Todo. Aqui está um exemplo de como utilizá-la:
+
+```typescript
+import { TodoRepository, TodoItem } from './src/model';
+import { Database } from './src/database';
+import config from './src/config';
+
+const database = new Database(config);
+const todoRepository = new TodoRepository(database);
+
+async function main() {
+    try {
+        await database.connect();
+
+        // Inserir um novo item de Todo
+        const newTodo: TodoItem = {
+            id: 0, // O ID será gerado automaticamente
+            description: 'Aprender TypeScript',
+            tags: ['typescript', 'programação'],
+            deadline: '2025-12-31',
+        };
+        const insertedTodo = await todoRepository.insert(newTodo);
+        console.log('Item inserido:', insertedTodo);
+
+        // Listar todos os itens de Todo
+        const allTodos = await todoRepository.listAll();
+        console.log('Todos os itens:', allTodos);
+
+        // Buscar um item pelo ID
+        const foundTodo = await todoRepository.findById(insertedTodo.id);
+        console.log('Item encontrado:', foundTodo);
+
+        // Atualizar um item de Todo
+        foundTodo.description = 'Aprender TypeScript Avançado';
+        const updateResult = await todoRepository.update(foundTodo);
+        console.log('Item atualizado:', updateResult);
+
+        // Remover um item pelo ID
+        const removeResult = await todoRepository.removeById(foundTodo.id);
+        console.log('Item removido:', removeResult);
+    } catch (error) {
+        console.error('Erro ao manipular itens de Todo:', error);
+    } finally {
+        await database.disconnect();
+    }
+}
+
+main();
+```
