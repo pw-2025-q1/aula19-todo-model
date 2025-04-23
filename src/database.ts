@@ -1,6 +1,9 @@
 import * as mongodb from "mongodb"
-import config, { Config } from "./config"
+import { Config } from "./config"
 
+/**
+ * Custom error class for database-related errors.
+ */
 class DatabaseError extends Error {};
 
 /**
@@ -40,7 +43,7 @@ class Database {
         if (!this.isConnected) {
             await this.client.connect();
             this.isConnected = true;
-            console.log("Connected to the database");  
+            console.info("Connected to the database");  
         }
     }
 
@@ -52,7 +55,7 @@ class Database {
         if (this.isConnected) {
             await this.client.close();
             this.isConnected = false;
-            console.log("Closed database connection");
+            console.info("Closed database connection");
         }
     }
 

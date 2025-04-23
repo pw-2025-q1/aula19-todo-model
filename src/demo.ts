@@ -2,8 +2,8 @@ import { TodoItem, TodoRepository } from "./model";
 import { Database } from "./database";
 import config from "./config";
 
-const database: Database = new Database(config);
-const todoRepository: TodoRepository = new TodoRepository(database);
+const database = new Database(config);
+const todoRepository = new TodoRepository(database);
 
 /**
  * Demonstrates inserting new TodoItems into the database.
@@ -80,7 +80,7 @@ async function demoRemoveById(id: number) {
  * Main demonstration function showcasing various TodoRepository methods.
  */
 async function demo() {
-    try {        
+    try {
         // Connect to the database
         await database.connect();
         console.log("=== Demonstration of TodoRepository Methods ===");

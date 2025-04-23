@@ -1,6 +1,9 @@
 import * as dotenv from 'dotenv';
 dotenv.config(); 
 
+/**
+ * Represents the configuration settings for the application.
+ */
 interface Config {
     readonly DATABASE_NAME: string;
     readonly collections: {

@@ -1,12 +1,18 @@
 import {Database} from "./database"
 import { ObjectId } from "mongodb"
 
+/**
+ * Represents a sequence in the database.
+ */
 interface SequenceDTO {
     _id?: ObjectId,
     name: string,
     seq: number
 }
 
+/**
+ * Represents a Todo item.
+ */
 interface TodoItem {
     id: number;
     description: string;
@@ -14,16 +20,28 @@ interface TodoItem {
     deadline?: string;
 }
 
+/**
+ * Represents a Todo item Data Transfer Object (DTO).
+ */
 interface TodoItemDTO extends TodoItem{
     _id?: ObjectId,
 }
 
+/**
+ * Enum for sequence names.
+ */
 enum SequenceName {
     TODO_ITEM_ID = "todo-item-id"
 }
 
+/**
+ * Custom error class for repository-related errors.
+ */
 class RepositoryError extends Error {}
 
+/**
+ * Repository class for managing Todo items in the database.
+ */
 class TodoRepository {
 
     private database: Database;
@@ -77,7 +95,7 @@ class TodoRepository {
         const newItem = { ...this.toDTO(toDoItem), id: await this.nextId(SequenceName.TODO_ITEM_ID) };
         const response = await this.getCollection().insertOne(newItem);
 
-        if (response.acknowledged && response.insertedId) {
+        if (response.acknowledged) {
             const insertedItem = await this.getCollection().findOne({ _id: response.insertedId }, { projection: { _id: 0 } });
             if (insertedItem) {
                 return this.fromDTO(insertedItem);
@@ -94,7 +112,7 @@ class TodoRepository {
     async listAll(): Promise<TodoItem[]> {
         return await this.getCollection()
                 .find()
-                .map(this.fromDTO)
+                .map(item => this.fromDTO(item))
                 .sort({ id: 1 })
                 .toArray();
     }
@@ -122,7 +140,7 @@ class TodoRepository {
             { id: toDoItem.id },
             this.toDTO(toDoItem)
         );
-        return response ? response.modifiedCount > 0 : false;
+        return response.modifiedCount > 0;
     }
 
     /**
@@ -138,13 +156,13 @@ class TodoRepository {
 
     /**
      * Removes all documents from the underlying collection.
-     * @returns A promise that resolves to true if the operation was successful, otherwise false.
+     * @returns A promise that resolves to the number of deleted documents.
      * @throws RepositoryError if the operation fails.
      */
-    async clearAll(): Promise<boolean> {
+    async clearAll(): Promise<number> {
         const response = await this.getCollection().deleteMany({});
         
-        return response.deletedCount !== undefined;
+        return response.deletedCount;
     }
 
     /**
